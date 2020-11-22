@@ -12,21 +12,24 @@ v  e  f  h  r  s       s分离体 h亏格 r内环
 */
 
 //构造一个体 一个面 一个外环 一个点 
-Solid* Model::mvfs(Coordinate *coordinate)
+void  Model::mvfs(Coordinate *coordinate)
 {
 	Vertex* v = new Vertex(coordinate);//new vertex
-	Solid *solid = new Solid;//new solid
-	solid->face = new Face;//new face
-	Face *f = solid->face;
+	Solid::Instance()->face = new Face;//new face
+	Face *f = Solid::Instance()->face;
 	Loop* lp = new Loop();//new out loop
+
 	v->pre = v;
 	v->next = v;
+
 	f->loop_out = lp;
 	f->next = f;
 	f->pre = f;
-	f->solid = solid;
+
 	lp->face = f;
-	return solid;
+
+	f->solid = Solid::Instance();
+	Solid::Instance()->face = f;
 }
 
 //生成一个新点 同时构造一条连接新点与另一给定点的边（半边）
@@ -54,7 +57,7 @@ Vertex* Model::mev(Vertex *sv, Loop* lp, Coordinate* coordinate)
 	sv->next = v;
 
 	if (lp->halfedge) {//find current first half edge
-		HalfEdge* curHfEdge = GetHfEdgeByVertex(lp, sv);
+		HalfEdge* curHfEdge = GetHfEdge(lp, sv);
 		curHfEdge->next->pre = hfedger;
 		hfedgel->next = hfedger;
 		hfedger->pre = hfedgel;
@@ -87,12 +90,12 @@ void Model::mef(Vertex* sv, Vertex *ev, Loop *loop)
 	//are sv and ev in the loop?
 	bool isinloop = true;
 	if (loop == nullptr)isinloop = false;
-	else if (GetHfEdgeByVertex(loop, sv) == nullptr || GetHfEdgeByVertex(loop, ev) == nullptr)isinloop = false;
+	else if (GetHfEdge(loop, sv) == nullptr || GetHfEdge(loop, ev) == nullptr)isinloop = false;
 
 	//find the loop which the two vertex belong
 	if (isinloop == false) {
 		for (int i = 0; i < Loop::looparr.size(); i++) {
-			if (GetHfEdgeByVertex(Loop::looparr[i], sv) && GetHfEdgeByVertex(Loop::looparr[i], ev)) {
+			if (GetHfEdge(Loop::looparr[i], sv) && GetHfEdge(Loop::looparr[i], ev)) {
 				loop = Loop::looparr[i];
 				break;
 			}
@@ -102,8 +105,8 @@ void Model::mef(Vertex* sv, Vertex *ev, Loop *loop)
 		//TODO
 		return;
 	}
-	HalfEdge* starthfEdge = GetHfEdgeByVertex(loop, sv);
-	HalfEdge* endhfEdge = GetHfEdgeByVertex(loop, ev);
+	HalfEdge* starthfEdge = GetHfEdge(loop, sv);
+	HalfEdge* endhfEdge = GetHfEdge(loop, ev);
 
 	//TODO
 
@@ -283,13 +286,25 @@ void Model::sweep(Coordinate* oritation, Loop *loop)//扫成操作
 	for (auto ele : arra) {
 		arrb.push_back(mev(ele, loop, Coordinate::AddCoordinate(ele->coordinate, oritation)));
 	}
-	for (int i = 0; i < arrb.size()-1; i++) {
+	for (int i = 0; i < arrb.size() - 1; i++) {
 		mef(arrb[i], arrb[i + 1], loop);
 	}
 	mef(arrb[0], arrb[arrb.size() - 1], loop);
-	
+
 	//TODO 
-	
+
+}
+
+void Model::kemr(Vertex * sv, Vertex * ev, Loop * loop)
+{
+	Edge* e = GetEdge(sv, ev);
+	kemr(e, loop);
+}
+
+void Model::semv(Vertex * sv, Vertex * ev, Coordinate * coordinate)
+{
+	Edge* e = GetEdge(sv, ev);
+	semv(e, coordinate);
 }
 
 void Model::clear()
@@ -311,7 +326,7 @@ Model::~Model()
 
 }
 
-HalfEdge* Model::GetHfEdgeByVertex(Loop* lp, Vertex* v) {
+HalfEdge* Model::GetHfEdge(Loop* lp, Vertex* v) {
 	if (!lp->halfedge) {
 		//TODO
 		return nullptr;
@@ -324,6 +339,23 @@ HalfEdge* Model::GetHfEdgeByVertex(Loop* lp, Vertex* v) {
 		it = it->next;
 		if (it == lp->halfedge) {
 			//TODO
+			return nullptr;
+		}
+	}
+}
+
+Edge * Model::GetEdge(Vertex * sv, Vertex * ev)
+{
+	Edge*  it = Solid::Instance()->edge;
+	if (!it) {
+		return nullptr;
+	}
+	while (true) {
+		if ((it->half_l->endv == sv&&it->half_l->startv == ev) || (it->half_r->endv == sv&&it->half_r->startv == ev)) {
+			return it;
+		}
+		it = it->next;
+		if (it == Solid::Instance()->edge) {
 			return nullptr;
 		}
 	}

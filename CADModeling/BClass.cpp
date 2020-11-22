@@ -30,12 +30,13 @@ void Face::AddInnerLoop(Loop* &lp) {
 }
 
 Coordinate* Loop::GetOritation() {
-	Coordinate *tmp;
+	Coordinate *tmp=new Coordinate;
 	HalfEdge *iterator = halfedge;
 	if (iterator == nullptr) {
 		tmp->x = 1;
 		tmp->y = 0;
 		tmp->z = 0;
+		return tmp;
 	}
 	while (true) {
 		//cross product
