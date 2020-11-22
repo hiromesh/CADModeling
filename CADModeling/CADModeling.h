@@ -29,7 +29,7 @@ private:
 	Ui::CADModelingClass ui;
 	GLWidget* glw;
 	QWidget* option;
-	QWidget* info;
+	QLabel* info;
 
 	QPushButton* btn_mvfs;
 	QPushButton* btn_mef;

@@ -298,7 +298,7 @@ void GLWidget::paintGL()
 	glColor3f(1, 1, 1);
 	glPointSize(10.0);
 	for (GLuint i = 0; i < Vertex::vertexarr.size(); i++) {
-		glVertex3f(10 * Vertex::vertexarr[i]->coordinate->x, 10 * Vertex::vertexarr[i]->coordinate->y, 10 * Vertex::vertexarr[i]->coordinate->z);
+		glVertex3f(10 * Vertex::vertexarr[i]->coordinate.x(), 10 * Vertex::vertexarr[i]->coordinate.y(), 10 * Vertex::vertexarr[i]->coordinate.z());
 
 	}
 	glEnd();
@@ -333,7 +333,7 @@ void GLWidget::paintGL()
 	}
 	glColor3f(0, 0, 0);
 	for (GLuint i = 0; i < Vertex::vertexarr.size(); i++) {
-		glRasterPos3f(10 * Vertex::vertexarr[i]->coordinate->x, 10 * Vertex::vertexarr[i]->coordinate->y, 10 * Vertex::vertexarr[i]->coordinate->z);
+		glRasterPos3f(10 * Vertex::vertexarr[i]->coordinate.x(), 10 * Vertex::vertexarr[i]->coordinate.y(), 10 * Vertex::vertexarr[i]->coordinate.z());
 		drawString(QString::number(Vertex::vertexarr[i]->id).toStdString());
 	}
 	glLoadIdentity();//initial identity
@@ -401,10 +401,9 @@ void GLWidget::drawHalfEdge(HalfEdge* he, bool selected, QVector3D normal)
 	if (selected) {
 		glLineWidth(3);
 		glColor3f(1, 0, 0);
-		QVector3D tmp_coor(he->startv->coordinate->x - he->endv->coordinate->x, he->startv->coordinate->y - he->endv->coordinate->y, he->startv->coordinate->z - he->endv->coordinate->z);
-		temp = QVector3D::crossProduct(normal, tmp_coor).normalized();
-		temp1 = 2 * temp + 10 * QVector3D(he->endv->coordinate->x, he->endv->coordinate->y, he->endv->coordinate->z) + tmp_coor.normalized() * 2;
-		temp2 = -2 * temp + 10 * QVector3D(he->endv->coordinate->x, he->endv->coordinate->y, he->endv->coordinate->z) + tmp_coor.normalized() * 2;
+		temp = QVector3D::crossProduct(normal, he->startv->coordinate - he->endv->coordinate).normalized();
+		temp1 = 2 * temp + 10 * he->endv->coordinate + (he->startv->coordinate - he->endv->coordinate).normalized() * 2;
+		temp2 = -2 * temp + 10 * he->endv->coordinate + (he->startv->coordinate - he->endv->coordinate).normalized() * 2;
 	}
 	else {
 		glLineWidth(0.5);
@@ -412,12 +411,12 @@ void GLWidget::drawHalfEdge(HalfEdge* he, bool selected, QVector3D normal)
 	}
 
 	glBegin(GL_LINES);
-	glVertex3f(10 * he->startv->coordinate->x, 10 * he->startv->coordinate->y, 10 * he->startv->coordinate->z);
-	glVertex3f(10 * he->endv->coordinate->x, 10 * he->endv->coordinate->y, 10 * he->endv->coordinate->z);
+	glVertex3f(10 * he->startv->coordinate.x(), 10 * he->startv->coordinate.y(), 10 * he->startv->coordinate.z());
+	glVertex3f(10 * he->endv->coordinate.x(), 10 * he->endv->coordinate.y(), 10 * he->endv->coordinate.z());
 	if (selected) {
-		glVertex3f(10 * he->endv->coordinate->x, 10 * he->endv->coordinate->y, 10 * he->endv->coordinate->z);
+		glVertex3f(10 * he->endv->coordinate.x(), 10 * he->endv->coordinate.y(), 10 * he->endv->coordinate.z());
 		glVertex3f(temp1.x(), temp1.y(), temp1.z());
-		glVertex3f(10 * he->endv->coordinate->x, 10 * he->endv->coordinate->y, 10 * he->endv->coordinate->z);
+		glVertex3f(10 * he->endv->coordinate.x(), 10 * he->endv->coordinate.y(), 10 * he->endv->coordinate.z());
 		glVertex3f(temp2.x(), temp2.y(), temp2.z());
 	}
 	glEnd();
@@ -455,9 +454,9 @@ void GLWidget::drawFace(Face *fa, bool selected)
 		glColor3f(0.8, 1, 0.7);
 	while (true) {
 		he = he->next;
-		data[count][0] = 10.0*he->startv->coordinate->x;
-		data[count][1] = 10.0*he->startv->coordinate->y;
-		data[count][2] = 10.0*he->startv->coordinate->z;
+		data[count][0] = 10.0*he->startv->coordinate.x();
+		data[count][1] = 10.0*he->startv->coordinate.y();
+		data[count][2] = 10.0*he->startv->coordinate.z();
 		//GUI->print(QString::number(data[count][0])+" "+QString::number(data[count][1])+" "+QString::number(data[count][2]));
 		gluTessVertex(tobj, data[count], data[count]);
 		count++;
@@ -475,9 +474,9 @@ void GLWidget::drawFace(Face *fa, bool selected)
 		he = innerLoop[i]->halfedge;
 		while (true) {
 			he = he->next;
-			data[count][0] = 10 * he->startv->coordinate->x;
-			data[count][1] = 10 * he->startv->coordinate->y;
-			data[count][2] = 10 * he->startv->coordinate->z;
+			data[count][0] = 10 * he->startv->coordinate.x();
+			data[count][1] = 10 * he->startv->coordinate.y();
+			data[count][2] = 10 * he->startv->coordinate.z();
 			gluTessVertex(tobj, data[count], data[count]);
 			count++;
 			if (he == innerLoop[i]->halfedge)
@@ -494,7 +493,7 @@ void GLWidget::drawLoop(Loop *lp, bool selected)
 	HalfEdge* it = lp->halfedge;
 	lp->normal = lp->GetOritation();
 	while (true) {
-		drawHalfEdge(it, selected, Coordinate::ToQVec3d(lp->normal));
+		drawHalfEdge(it, selected, lp->normal);
 		it = it->next;
 		if (it == lp->halfedge)
 			break;

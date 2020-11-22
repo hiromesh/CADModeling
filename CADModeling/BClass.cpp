@@ -29,28 +29,33 @@ void Face::AddInnerLoop(Loop* &lp) {
 	}
 }
 
-Coordinate* Loop::GetOritation() {
-	Coordinate *tmp=new Coordinate;
+QVector3D Loop::GetOritation() {
+	QVector3D tmp;
 	HalfEdge *iterator = halfedge;
 	if (iterator == nullptr) {
-		tmp->x = 1;
-		tmp->y = 0;
-		tmp->z = 0;
-		return tmp;
+		//tmp.x = 1;
+		//tmp.y = 0;
+		//tmp.z = 0;
+		return QVector3D(1,0,0);
 	}
 	while (true) {
 		//cross product
-		Coordinate* a = Coordinate::SubCoordinate(iterator->startv->coordinate, iterator->endv->coordinate);
-		Coordinate* b = Coordinate::SubCoordinate(iterator->next->startv->coordinate, iterator->next->endv->coordinate);
-		Coordinate* c = Coordinate::CrossProduct(a, b);
-		tmp = Coordinate::AddCoordinate(tmp, c);
+		QVector3D a, b, c;
+		a = iterator->startv->coordinate - iterator->endv->coordinate;
+		b = iterator->next->startv->coordinate - iterator->next->endv->coordinate;
+		c = QVector3D::crossProduct(a, b);
+		tmp += c;
+		//Coordinate* a = Coordinate::SubCoordinate(iterator->startv->coordinate, iterator->endv->coordinate);
+		//Coordinate* b = Coordinate::SubCoordinate(iterator->next->startv->coordinate, iterator->next->endv->coordinate);
+		//Coordinate* c = Coordinate::CrossProduct(a, b);
+		//tmp = Coordinate::AddCoordinate(tmp, c);
 		iterator = iterator->next;
 		if (iterator == halfedge)//return to the beginning edge
 			break;
 	}
 	//normalised
-	tmp = Coordinate::Normalised(tmp);
-	return tmp;
+	//tmp = QVector3D::normalize(tmp);
+	return tmp.normalized();
 }
 
 void Vertex::PrintVertex() {
@@ -109,12 +114,12 @@ QVector3D Coordinate::ToQVec3d(Coordinate * coor)
 
 QVector3D Coordinate::operator+(Coordinate * a)
 {
-	return QVector3D(a->x+this->x,a->y+this->y,a->z+this->z);
+	return QVector3D(a->x + this->x, a->y + this->y, a->z + this->z);
 }
 
 QVector3D Coordinate::operator-(Coordinate * a)
 {
-	return QVector3D(this->x-a->x,this->y-a->y,this->z-a->z);
+	return QVector3D(this->x - a->x, this->y - a->y, this->z - a->z);
 }
 
 Matrix4::Matrix4()

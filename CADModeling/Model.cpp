@@ -12,7 +12,7 @@ v  e  f  h  r  s       s·ÖÀëÌå h¿÷¸ñ rÄÚ»·
 */
 
 //¹¹ÔìÒ»¸öÌå Ò»¸öÃæ Ò»¸öÍâ»· Ò»¸öµã 
-void  Model::mvfs(Coordinate *coordinate)
+void  Model::mvfs(QVector3D coordinate)
 {
 	Vertex* v = new Vertex(coordinate);//new vertex
 	Solid::Instance()->face = new Face;//new face
@@ -33,7 +33,7 @@ void  Model::mvfs(Coordinate *coordinate)
 }
 
 //Éú³ÉÒ»¸öÐÂµã Í¬Ê±¹¹ÔìÒ»ÌõÁ¬½ÓÐÂµãÓëÁíÒ»¸ø¶¨µãµÄ±ß£¨°ë±ß£©
-Vertex* Model::mev(Vertex *sv, Loop* lp, Coordinate* coordinate)
+Vertex* Model::mev(Vertex *sv, Loop* lp, QVector3D coordinate)
 {
 	Vertex *v = new Vertex(coordinate);//new vertex
 	Edge *edge = new Edge();//new edge
@@ -232,7 +232,7 @@ void Model::kfmrh(Face *faceToDelete, Face *outerface)
 
 }
 
-void Model::semv(Edge* e, Coordinate* coordinate)//¸ø¶¨±ßÉÏ¹¹ÔìÒ»¸öÐÂµã£¬Í¬Ê±½«±ß·ÖÀëÎªÁ½Ìõ±ß
+void Model::semv(Edge* e, QVector3D coordinate)//¸ø¶¨±ßÉÏ¹¹ÔìÒ»¸öÐÂµã£¬Í¬Ê±½«±ß·ÖÀëÎªÁ½Ìõ±ß
 {
 	HalfEdge* left = e->half_l;
 	HalfEdge* right = e->half_r;
@@ -274,7 +274,7 @@ void Model::semv(Edge* e, Coordinate* coordinate)//¸ø¶¨±ßÉÏ¹¹ÔìÒ»¸öÐÂµã£¬Í¬Ê±½«±
 	//TODO
 }
 
-void Model::sweep(Coordinate* oritation, Loop *loop)//É¨³É²Ù×÷
+void Model::sweep(QVector3D oritation, Loop *loop)//É¨³É²Ù×÷
 {
 	HalfEdge* it = loop->halfedge;
 	vector<Vertex*>arra, arrb;
@@ -284,7 +284,7 @@ void Model::sweep(Coordinate* oritation, Loop *loop)//É¨³É²Ù×÷
 		if (it == loop->halfedge)break;
 	}
 	for (auto ele : arra) {
-		arrb.push_back(mev(ele, loop, Coordinate::AddCoordinate(ele->coordinate, oritation)));
+		arrb.push_back(mev(ele, loop, ele->coordinate+oritation));
 	}
 	for (int i = 0; i < arrb.size() - 1; i++) {
 		mef(arrb[i], arrb[i + 1], loop);
@@ -301,7 +301,7 @@ void Model::kemr(Vertex * sv, Vertex * ev, Loop * loop)
 	kemr(e, loop);
 }
 
-void Model::semv(Vertex * sv, Vertex * ev, Coordinate * coordinate)
+void Model::semv(Vertex * sv, Vertex * ev, QVector3D coordinate)
 {
 	Edge* e = GetEdge(sv, ev);
 	semv(e, coordinate);

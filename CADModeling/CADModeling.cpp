@@ -6,6 +6,7 @@ CADModeling::CADModeling(QWidget *parent)
 	ui.setupUi(this);
 	glw = new GLWidget(ui.centralWidget->findChild<QOpenGLWidget*>("openGLWidget"));
 	option = ui.centralWidget->findChild<QWidget*>("widget")->findChild<QWidget*>("option");
+	info = ui.centralWidget->findChild<QWidget*>("widget")->findChild<QLabel*>("info");
 	btn_mvfs = ui.centralWidget->findChild<QWidget*>("widget")->findChild<QPushButton*>("mvfs");
 	btn_semv = ui.centralWidget->findChild<QWidget*>("widget")->findChild<QPushButton*>("semv");
 	btn_mef = ui.centralWidget->findChild<QWidget*>("widget")->findChild<QPushButton*>("mef");
@@ -52,9 +53,10 @@ CADModeling::CADModeling(QWidget *parent)
 
 void CADModeling::Btn_mvfs()
 {
-	Model::Instance()->mvfs(&Coordinate(0, 0, 0));
+	Model::Instance()->mvfs(QVector3D(0, 0, 0));
 	btn_mvfs->setEnabled(false);
 	btn_mev->setEnabled(true);
+	info->setText("mvfs!");
 	UpdateGUI();
 }
 
@@ -82,6 +84,7 @@ void CADModeling::Btn_mef()
 	btn_sweep->setEnabled(true);
 	btn_kfmrh->setEnabled(true);
 	Model::Instance()->mef(sv, ev, lp);
+	info->setText("mef! loop:" + QString(loopid->value()) + "vertex:" + QString(vertexid->value()) + "vertex:" + QString(vertexid2->value()));
 	UpdateGUI();
 }
 
@@ -103,8 +106,10 @@ void CADModeling::Btn_mev()
 	btn_mef->setEnabled(true);
 	btn_kemr->setEnabled(true);
 
-	Model::Instance()->mev(vp, lp, &Coordinate(dsb1->value(), dsb2->value(), dsb3->value()));
+	Model::Instance()->mev(vp, lp, QVector3D(dsb1->value(), dsb2->value(), dsb3->value()));
 	vertexid->setValue(vertexid->value() + 1);
+	info->setText("mev! loop:" + QString(loopid->value()) + "vertex:" + QString(vertexid->value()));
+
 	UpdateGUI();
 }
 
@@ -136,6 +141,8 @@ void CADModeling::Btn_kfmrh()
 	}
 
 	Model::Instance()->kfmrh(fa, fb);
+	info->setText("kfmrh! face:" + QString(faceid->value()) + "face:" + QString(faceid2->value()));
+
 	UpdateGUI();
 }
 
@@ -163,6 +170,8 @@ void CADModeling::Btn_kemr()
 		}
 	}
 	Model::Instance()->kemr(sv, ev, lp);
+	info->setText("kemr! loop:" + QString(loopid->value()) + "vertex:" + QString(vertexid->value()) + "vertex:" + QString(vertexid2->value()));
+
 	UpdateGUI();
 }
 
@@ -182,7 +191,9 @@ void CADModeling::Btn_semv()
 			break;
 		}
 	}
-	Model::Instance()->semv(sv, ev, &Coordinate(dsb1->value(), dsb2->value(), dsb3->value()));
+	Model::Instance()->semv(sv, ev, QVector3D(dsb1->value(), dsb2->value(), dsb3->value()));
+	info->setText("semv! vertex:" + QString(vertexid->value()) + "vertex:" + QString(vertexid2->value()));
+
 	UpdateGUI();
 }
 
@@ -195,7 +206,9 @@ void CADModeling::Btn_sweep()
 			break;
 		}
 	}
-	Model::Instance()->sweep(&Coordinate(dsb1->value(), dsb2->value(), dsb3->value()), lp);
+	Model::Instance()->sweep(QVector3D(dsb1->value(), dsb2->value(), dsb3->value()), lp);
+	info->setText("sweep! loop:" + QString(loopid->value()));
+
 	UpdateGUI();
 }
 
@@ -220,6 +233,8 @@ void CADModeling::Btn_clear()
 	btn_sweep->setEnabled(false);
 	btn_kemr->setEnabled(false);
 	btn_kfmrh->setEnabled(false);
+	info->setText("clear!");
+
 }
 
 void CADModeling::UpdateGUI()

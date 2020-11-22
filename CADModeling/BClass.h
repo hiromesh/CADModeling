@@ -17,10 +17,10 @@ class Vertex {
 public:
 	int id;
 	static vector<Vertex*>vertexarr;
-	Coordinate *coordinate;//坐标系
+	QVector3D coordinate;//坐标系
 	Vertex* next, *pre;
 	static int vertexnum;
-	Vertex(Coordinate *co) :next(nullptr), pre(nullptr) {
+	Vertex(QVector3D co) :next(nullptr), pre(nullptr) {
 		coordinate = co;
 		id = vertexnum++;
 		vertexarr.push_back(this);
@@ -59,12 +59,12 @@ public:
 	HalfEdge *halfedge;
 	Face *face;
 	Loop* next, *pre;
-	Coordinate* normal;//法向
+	QVector3D normal;//法向
 	Loop() :halfedge(nullptr), face(nullptr), next(nullptr), pre(nullptr) {
 		id = loopnum++;
 		looparr.push_back(this);
 	}
-	Coordinate* GetOritation();
+	QVector3D GetOritation();
 	void PrintLoop();
 };
 
